@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Data\User\UpdateUserData;
+use App\Data\UserData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\UpdateUserRequest;
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\HashIdService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\LaravelData\Optional;
 
 class UserController extends Controller
 {
@@ -22,15 +23,14 @@ class UserController extends Controller
             return response()->json(['message' => 'User not found.'], 404);
         }
 
-        // Users may only view their own profile unless they are viewing a public profile
         if ($request->user()->id !== $user->id) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
-        return response()->json(['data' => new UserResource($user)]);
+        return response()->json(['data' => UserData::fromModel($user)]);
     }
 
-    public function update(UpdateUserRequest $request, string $hashedId): JsonResponse
+    public function update(UpdateUserData $data, string $hashedId): JsonResponse
     {
         $user = $this->resolveUser($hashedId);
 
@@ -38,14 +38,15 @@ class UserController extends Controller
             return response()->json(['message' => 'User not found.'], 404);
         }
 
-        if ($request->user()->id !== $user->id) {
+        if (auth()->id() !== $user->id) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
-        // username is intentionally excluded — it cannot be changed after registration
-        $user->update($request->only(['display_name', 'email', 'password', 'is_active']));
+        // toArray() automatically excludes Optional fields that were not sent in the request
+        // username is intentionally absent from UpdateUserData — it cannot be changed
+        $user->update($data->toArray());
 
-        return response()->json(['data' => new UserResource($user)]);
+        return response()->json(['data' => UserData::fromModel($user->fresh())]);
     }
 
     public function destroy(Request $request, string $hashedId): JsonResponse
@@ -61,8 +62,6 @@ class UserController extends Controller
         }
 
         $user->update(['is_active' => false]);
-
-        // Revoke all tokens so they can no longer authenticate
         $user->tokens()->delete();
 
         return response()->json(['message' => 'Account deactivated successfully.']);

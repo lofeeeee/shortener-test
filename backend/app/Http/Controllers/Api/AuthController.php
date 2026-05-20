@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Data\Auth\LoginData;
+use App\Data\Auth\RegisterData;
+use App\Data\UserData;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\RegisterRequest;
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,31 +13,32 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterData $data): JsonResponse
     {
         $user = User::create([
-            'username' => $request->username,
-            'display_name' => $request->display_name,
-            'email' => $request->email,
-            'password' => $request->password,
+            'username' => $data->username,
+            'display_name' => $data->display_name,
+            'email' => $data->email,
+            'password' => $data->password,
             'is_active' => true,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'data' => new UserResource($user),
+            'data' => UserData::fromModel($user),
             'token' => $token,
         ], 201);
     }
 
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginData $data): JsonResponse
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt(['email' => $data->email, 'password' => $data->password])) {
             return response()->json(['message' => 'Invalid credentials.'], 401);
         }
 
-        $user = User::where('email', $request->email)->first();
+        /** @var User $user */
+        $user = User::where('email', $data->email)->first();
 
         if (!$user->is_active) {
             Auth::logout();
@@ -47,7 +48,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'data' => new UserResource($user),
+            'data' => UserData::fromModel($user),
             'token' => $token,
         ]);
     }
@@ -61,6 +62,6 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['data' => new UserResource($request->user())]);
+        return response()->json(['data' => UserData::fromModel($request->user())]);
     }
 }
