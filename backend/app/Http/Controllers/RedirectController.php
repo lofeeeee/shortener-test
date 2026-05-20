@@ -3,19 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Link;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 
 class RedirectController extends Controller
 {
-    public function redirect(string $uniqueId): RedirectResponse|Response
+    public function redirect(string $uniqueId): RedirectResponse|JsonResponse
     {
         $link = Link::where('unique_id', $uniqueId)
             ->where('is_active', true)
             ->first();
 
         if (!$link) {
-            return response()->view('errors.404', [], 404);
+            return response()->json(['message' => 'Short link not found or has been deactivated.'], 404);
+        }
+
+        if ($link->isExpired()) {
+            return response()->json(['message' => 'This link has expired.'], 410);
         }
 
         // Atomic increment to avoid race conditions under concurrent hits

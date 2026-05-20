@@ -18,12 +18,20 @@ class LinkController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Link::where('created_by', $request->user()->id)
-            ->orderBy('datetime_created', 'desc');
+            ->orderBy('created_at', 'desc');
 
-        if ($request->has('include_deleted')) {
-            // show all including soft-deleted
-        } else {
+        if (!$request->boolean('include_deleted')) {
             $query->where('is_active', true);
+        }
+
+        if ($request->boolean('include_expired')) {
+            // show expired links too
+        } else {
+            // exclude links where valid_until has passed
+            $query->where(function ($q) {
+                $q->whereNull('valid_until')
+                    ->orWhere('valid_until', '>', now());
+            });
         }
 
         $links = $query->paginate((int) $request->get('per_page', 15));
@@ -45,9 +53,9 @@ class LinkController extends Controller
             'unique_id' => $this->generateUniqueId(),
             'link_target' => $request->link_target,
             'passed' => 0,
-            'datetime_created' => now(),
-            'created_by' => $request->user()->id,
             'is_active' => true,
+            'valid_until' => $request->valid_until ?? null,
+            'created_by' => $request->user()->id,
         ]);
 
         return response()->json(['data' => new LinkResource($link)], 201);
@@ -72,7 +80,7 @@ class LinkController extends Controller
             return response()->json(['message' => 'Link not found.'], 404);
         }
 
-        $link->update($request->only(['link_target', 'is_active']));
+        $link->update($request->only(['link_target', 'is_active', 'valid_until']));
 
         return response()->json(['data' => new LinkResource($link)]);
     }
@@ -91,7 +99,7 @@ class LinkController extends Controller
 
         $link->update([
             'is_active' => false,
-            'datetime_deleted' => now(),
+            'deleted_at' => now(),
             'deleted_by' => $request->user()->id,
         ]);
 

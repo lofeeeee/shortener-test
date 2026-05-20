@@ -4,30 +4,38 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Link extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
+    // created_at and updated_at are managed automatically
+    public $timestamps = true;
 
     protected $fillable = [
         'unique_id',
         'link_target',
         'passed',
-        'datetime_created',
-        'created_by',
-        'datetime_deleted',
-        'deleted_by',
         'is_active',
+        'valid_until',
+        'created_by',
+        'deleted_at',
+        'deleted_by',
     ];
 
     protected $casts = [
-        'datetime_created' => 'datetime',
-        'datetime_deleted' => 'datetime',
+        'valid_until' => 'datetime',
+        'deleted_at' => 'datetime',
         'is_active' => 'boolean',
         'passed' => 'integer',
     ];
+
+    public function isExpired(): bool
+    {
+        return $this->valid_until !== null
+            && Carbon::now()->greaterThanOrEqualTo($this->valid_until);
+    }
 
     public function creator()
     {

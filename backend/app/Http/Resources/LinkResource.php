@@ -18,11 +18,14 @@ class LinkResource extends JsonResource
             'short_url' => config('app.url').'/'.$this->unique_id,
             'link_target' => $this->link_target,
             'passed' => $this->passed,
-            'datetime_created' => $this->datetime_created?->toIso8601String(),
-            'created_by' => $this->created_by ? $hashId->encode($this->created_by) : null,
-            'datetime_deleted' => $this->datetime_deleted?->toIso8601String(),
-            'deleted_by' => $this->deleted_by ? $hashId->encode($this->deleted_by) : null,
             'is_active' => $this->is_active,
+            'is_expired' => $this->isExpired(),
+            'valid_until' => $this->valid_until?->toIso8601String(),
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
+            'created_by' => $this->created_by ? $hashId->encode($this->created_by) : null,
+            'deleted_at' => $this->deleted_at?->toIso8601String(),
+            'deleted_by' => $this->deleted_by ? $hashId->encode($this->deleted_by) : null,
         ];
     }
 }
