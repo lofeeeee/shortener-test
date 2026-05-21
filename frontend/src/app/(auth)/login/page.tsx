@@ -6,9 +6,10 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -27,10 +28,12 @@ export default function LoginPage() {
     return e;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
     setErrors({});
     setLoading(true);
     try {
@@ -54,7 +57,7 @@ export default function LoginPage() {
         </Link>
       </p>
 
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -64,6 +67,7 @@ export default function LoginPage() {
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submit()}
             aria-invalid={!!errors.email}
             className={errors.email ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
@@ -80,6 +84,7 @@ export default function LoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
               aria-invalid={!!errors.password}
               className={`pr-10 ${errors.password ? "border-red-400 focus-visible:ring-red-400" : ""}`}
             />
@@ -95,15 +100,19 @@ export default function LoginPage() {
           {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
         </div>
 
-        <Button
-          type="submit"
+        <button
+          type="button"
           disabled={loading}
-          className="bg-teal-600 hover:bg-teal-700 text-white mt-2 cursor-pointer transition-colors duration-150"
+          onClick={submit}
+          className={cn(
+            buttonVariants(),
+            "bg-teal-600 hover:bg-teal-700 text-white mt-2 cursor-pointer transition-colors duration-150 w-full h-9"
+          )}
         >
           {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           Sign in
-        </Button>
-      </form>
+        </button>
+      </div>
     </>
   );
 }

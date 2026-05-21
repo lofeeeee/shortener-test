@@ -31,7 +31,7 @@ class LinkData extends Data
         return new self(
             id: $hashId->encode($link->id),
             unique_id: $link->unique_id,
-            short_url: config('app.url').'/'.$link->unique_id,
+            short_url: request()->getSchemeAndHttpHost().'/'.$link->unique_id,
             link_target: $link->link_target,
             passed: $link->passed,
             is_active: $link->is_active,

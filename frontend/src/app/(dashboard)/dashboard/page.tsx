@@ -78,8 +78,10 @@ export default function DashboardPage() {
   const activeCount = data.filter((l) => l.is_active && !l.is_expired).length;
   const expiredCount = data.filter((l) => l.is_expired).length;
 
-  const copyShortUrl = (url: string) => {
-    navigator.clipboard.writeText(url).then(() => toast.success("Copied to clipboard!"));
+  const shortUrl = (uniqueId: string) => `${window.location.origin}/${uniqueId}`;
+
+  const copyShortUrl = (uniqueId: string) => {
+    navigator.clipboard.writeText(shortUrl(uniqueId)).then(() => toast.success("Copied to clipboard!"));
   };
 
   return (
@@ -147,15 +149,16 @@ export default function DashboardPage() {
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-1.5">
                         <a
-                          href={link.short_url}
+                          href={shortUrl(link.unique_id)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-teal-600 font-medium hover:underline truncate max-w-[140px]"
+                          className="text-teal-600 font-mono font-medium hover:underline"
+                          title={shortUrl(link.unique_id)}
                         >
-                          {link.short_url.replace(/^https?:\/\//, "")}
+                          /{link.unique_id}
                         </a>
                         <button
-                          onClick={() => copyShortUrl(link.short_url)}
+                          onClick={() => copyShortUrl(link.unique_id)}
                           className="text-teal-400 hover:text-teal-600 shrink-0 cursor-pointer"
                           aria-label="Copy short URL"
                         >
