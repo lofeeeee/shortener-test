@@ -15,3 +15,8 @@ Homestead.yaml
 auth.json
 npm-debug.log
 yarn-error.log
+.claude
+/.claude
+setup.bat
+run.bat
+/backend/setup.bat
