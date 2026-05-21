@@ -1,0 +1,5 @@
+# Claude Code config
+.claude/
+
+# Dev server launcher (not needed in version control)
+run.bat
