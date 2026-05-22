@@ -9,28 +9,34 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'username' => 'admin',
-            'display_name' => 'Administrator',
-            'email' => 'admin@example.com',
-            'password' => 'Secret1234!',
-            'is_active' => true,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'username' => 'admin',
+                'display_name' => 'Administrator',
+                'password' => 'Secret1234!',
+                'is_active' => true,
+            ]
+        );
 
-        User::create([
-            'username' => 'johndoe',
-            'display_name' => 'John Doe',
-            'email' => 'user@example.com',
-            'password' => 'Secret1234!',
-            'is_active' => true,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'user@example.com'],
+            [
+                'username' => 'johndoe',
+                'display_name' => 'John Doe',
+                'password' => 'Secret1234!',
+                'is_active' => true,
+            ]
+        );
 
-        User::create([
-            'username' => 'inactiveuser',
-            'display_name' => 'Inactive User',
-            'email' => 'inactive@example.com',
-            'password' => 'Secret1234!',
-            'is_active' => false,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'inactive@example.com'],
+            [
+                'username' => 'inactiveuser',
+                'display_name' => 'Inactive User',
+                'password' => 'Secret1234!',
+                'is_active' => false,
+            ]
+        );
     }
 }

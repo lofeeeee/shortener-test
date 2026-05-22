@@ -14,16 +14,15 @@ import { cn } from "@/lib/utils";
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ identifier?: string; password?: string }>({});
 
   const validate = () => {
     const e: typeof errors = {};
-    if (!email) e.email = "Email is required.";
-    else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Enter a valid email.";
+    if (!identifier) e.identifier = "Email or username is required.";
     if (!password) e.password = "Password is required.";
     return e;
   };
@@ -37,7 +36,7 @@ export default function LoginPage() {
     setErrors({});
     setLoading(true);
     try {
-      await login(email, password);
+      await login(identifier, password);
       toast.success("Welcome back!");
       router.push("/dashboard");
     } catch (err) {
@@ -59,19 +58,19 @@ export default function LoginPage() {
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="identifier">Email or Username</Label>
           <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="identifier"
+            type="text"
+            autoComplete="username"
+            placeholder="you@example.com or johndoe"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submit()}
-            aria-invalid={!!errors.email}
-            className={errors.email ? "border-red-400 focus-visible:ring-red-400" : ""}
+            aria-invalid={!!errors.identifier}
+            className={errors.identifier ? "border-red-400 focus-visible:ring-red-400" : ""}
           />
-          {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+          {errors.identifier && <p className="text-xs text-red-500">{errors.identifier}</p>}
         </div>
 
         <div className="flex flex-col gap-1.5">

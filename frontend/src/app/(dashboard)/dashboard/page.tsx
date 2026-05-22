@@ -81,7 +81,19 @@ export default function DashboardPage() {
   const shortUrl = (uniqueId: string) => `${window.location.origin}/${uniqueId}`;
 
   const copyShortUrl = (uniqueId: string) => {
-    navigator.clipboard.writeText(shortUrl(uniqueId)).then(() => toast.success("Copied to clipboard!"));
+    const url = shortUrl(uniqueId);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => toast.success("Copied to clipboard!"));
+    } else {
+      const el = document.createElement("textarea");
+      el.value = url;
+      el.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      toast.success("Copied to clipboard!");
+    }
   };
 
   return (

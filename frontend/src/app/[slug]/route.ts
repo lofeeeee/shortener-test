@@ -5,7 +5,7 @@ const BACKEND = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
 const NEXT_ROUTES = new Set(["dashboard", "login", "register", "settings", "api", "_next"]);
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
@@ -14,12 +14,14 @@ export async function GET(
     return NextResponse.next();
   }
 
+  // Fetch server-to-server (loopback) so the browser never sees the backend address.
+  // This works from any device — only Next.js talks to 127.0.0.1, not the browser.
   const res = await fetch(`${BACKEND}/${slug}`, { redirect: "manual" });
 
   const location = res.headers.get("location");
   if (location) {
-    return NextResponse.redirect(location);
+    return NextResponse.redirect(location, { status: 302 });
   }
 
-  return NextResponse.redirect(new URL("/", _request.url));
+  return NextResponse.redirect(new URL("/", request.url));
 }

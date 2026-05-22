@@ -4,6 +4,7 @@
 /public/hot
 /public/storage
 /storage/*.key
+/bootstrap/cache/
 /vendor
 .env
 .env.backup
@@ -18,3 +19,9 @@ yarn-error.log
 
 # Setup script (local-only)
 setup.bat
+
+**/caddy
+frankenphp
+frankenphp-worker.php
+rr
+.rr.yaml

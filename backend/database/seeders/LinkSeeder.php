@@ -10,8 +10,8 @@ class LinkSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('username', 'admin')->first();
-        $john = User::where('username', 'johndoe')->first();
+        $admin = User::where('username', 'admin')->firstOrFail();
+        $john  = User::where('username', 'johndoe')->firstOrFail();
 
         $links = [
             // Active, permanent
@@ -81,7 +81,7 @@ class LinkSeeder extends Seeder
         ];
 
         foreach ($links as $link) {
-            Link::create($link);
+            Link::firstOrCreate(['unique_id' => $link['unique_id']], $link);
         }
     }
 }

@@ -64,7 +64,7 @@ export const auth = {
     password_confirmation: string;
   }) => request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify(body) }),
 
-  login: (body: { email: string; password: string }) =>
+  login: (body: { login: string; password: string }) =>
     request<AuthResponse>("/auth/login", { method: "POST", body: JSON.stringify(body) }),
 
   logout: () => request<void>("/auth/logout", { method: "POST" }),

@@ -33,12 +33,14 @@ class AuthController extends Controller
 
     public function login(LoginData $data): JsonResponse
     {
-        if (!Auth::attempt(['email' => $data->email, 'password' => $data->password])) {
+        $field = str_contains($data->login, '@') ? 'email' : 'username';
+
+        if (!Auth::attempt([$field => $data->login, 'password' => $data->password])) {
             return response()->json(['message' => 'Invalid credentials.'], 401);
         }
 
         /** @var User $user */
-        $user = User::where('email', $data->email)->first();
+        $user = User::where($field, $data->login)->first();
 
         if (!$user->is_active) {
             Auth::logout();
