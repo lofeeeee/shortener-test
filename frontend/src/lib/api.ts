@@ -43,6 +43,7 @@ export interface AuthUser {
   display_name: string;
   email: string;
   is_active: boolean;
+  can_custom_slug: boolean;
   created_at: string;
 }
 
@@ -110,7 +111,7 @@ export const links = {
 
   get: (id: string) => request<LinkResponse>(`/links/${id}`),
 
-  create: (body: { link_target: string; valid_until?: string | null }) =>
+  create: (body: { link_target: string; valid_until?: string | null; custom_slug?: string | null }) =>
     request<LinkResponse>("/links", { method: "POST", body: JSON.stringify(body) }),
 
   update: (id: string, body: { link_target?: string; is_active?: boolean; valid_until?: string | null }) =>

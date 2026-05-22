@@ -9,6 +9,8 @@ use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\Url;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -23,6 +25,7 @@ class UpdateLinkData extends Data
 
         // Pass null explicitly to remove an existing expiry date.
         #[Nullable, Date, After('now')]
+        #[WithCast(DateTimeInterfaceCast::class, format: 'Y-m-d')]
         public readonly Optional|Carbon|null $valid_until,
     ) {}
 }

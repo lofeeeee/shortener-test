@@ -20,6 +20,9 @@ yarn-error.log
 # Setup script (local-only)
 setup.bat
 
+# Local-only migrations (base schema migrations already committed)
+/database/migrations/2026_*
+
 **/caddy
 frankenphp
 frankenphp-worker.php

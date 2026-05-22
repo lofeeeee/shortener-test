@@ -45,12 +45,25 @@ class LinkController extends Controller
 
     public function store(CreateLinkData $data, Request $request): JsonResponse
     {
+        $user = $request->user();
+        $customSlug = !($data->custom_slug instanceof \Spatie\LaravelData\Optional) ? $data->custom_slug : null;
+
+        if ($customSlug && $user->can_custom_slug) {
+            if (Link::where('unique_id', $customSlug)->exists()) {
+                return response()->json(['message' => 'This slug is already taken. Please choose another.'], 422);
+            }
+            $uniqueId = $customSlug;
+        } else {
+            $uniqueId = $this->generateUniqueId();
+        }
+
         $link = Link::create([
-            ...$data->toArray(),
-            'unique_id' => $this->generateUniqueId(),
+            'link_target' => $data->link_target,
+            'valid_until' => $data->valid_until,
+            'unique_id' => $uniqueId,
             'passed' => 0,
             'is_active' => true,
-            'created_by' => $request->user()->id,
+            'created_by' => $user->id,
         ]);
 
         return response()->json(['data' => LinkData::fromModel($link)], 201);

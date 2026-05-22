@@ -14,6 +14,7 @@ class UserData extends Data
         public readonly string  $display_name,
         public readonly string  $email,
         public readonly bool    $is_active,
+        public readonly bool    $can_custom_slug,
         public readonly ?string $created_at,
     ) {}
 
@@ -27,6 +28,7 @@ class UserData extends Data
             display_name: $user->display_name,
             email: $user->email,
             is_active: $user->is_active,
+            can_custom_slug: (bool) ($user->can_custom_slug ?? false),
             created_at: $user->created_at?->toIso8601String(),
         );
     }

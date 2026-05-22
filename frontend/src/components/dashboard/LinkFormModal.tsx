@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { links, Link } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,15 +25,20 @@ interface Props {
 
 export default function LinkFormModal({ open, onClose, onSaved, link }: Props) {
   const isEdit = !!link;
+  const { user } = useAuth();
+  const canCustomSlug = !!user?.can_custom_slug;
+
   const [target, setTarget] = useState("");
   const [validUntil, setValidUntil] = useState("");
-  const [errors, setErrors] = useState<{ target?: string }>({});
+  const [customSlug, setCustomSlug] = useState("");
+  const [errors, setErrors] = useState<{ target?: string; customSlug?: string }>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
       setTarget(link?.link_target ?? "");
       setValidUntil(link?.valid_until ? link.valid_until.slice(0, 10) : "");
+      setCustomSlug("");
       setErrors({});
     }
   }, [open, link]);
@@ -48,6 +54,11 @@ export default function LinkFormModal({ open, onClose, onSaved, link }: Props) {
         e.target = "Enter a valid URL (include https://).";
       }
     }
+    if (canCustomSlug && !isEdit && customSlug) {
+      if (!/^[a-z0-9][a-z0-9_-]{1,18}[a-z0-9]$/.test(customSlug)) {
+        e.customSlug = "3–20 chars, lowercase letters, numbers, hyphens, underscores. Must start and end with a letter or number.";
+      }
+    }
     return e;
   };
 
@@ -61,6 +72,7 @@ export default function LinkFormModal({ open, onClose, onSaved, link }: Props) {
       const body = {
         link_target: target.trim(),
         valid_until: validUntil || null,
+        ...(canCustomSlug && !isEdit && customSlug ? { custom_slug: customSlug } : {}),
       };
       if (isEdit && link) {
         await links.update(link.id, body);
@@ -101,6 +113,29 @@ export default function LinkFormModal({ open, onClose, onSaved, link }: Props) {
             />
             {errors.target && <p className="text-xs text-red-500">{errors.target}</p>}
           </div>
+
+          {canCustomSlug && !isEdit && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="custom-slug">
+                Custom slug{" "}
+                <span className="text-teal-500 font-normal">(optional — leave blank to auto-generate)</span>
+              </Label>
+              <Input
+                id="custom-slug"
+                type="text"
+                placeholder="my-link"
+                value={customSlug}
+                onChange={(e) => setCustomSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                maxLength={20}
+                aria-invalid={!!errors.customSlug}
+                className={errors.customSlug ? "border-red-400 focus-visible:ring-red-400" : ""}
+              />
+              {errors.customSlug
+                ? <p className="text-xs text-red-500">{errors.customSlug}</p>
+                : <p className="text-xs text-teal-500/70">Only lowercase letters, numbers, hyphens, and underscores.</p>
+              }
+            </div>
+          )}
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="valid-until">

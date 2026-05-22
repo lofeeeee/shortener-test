@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
                 'display_name' => 'Administrator',
                 'password' => 'Secret1234!',
                 'is_active' => true,
+                'can_custom_slug' => true,
             ]
         );
 
