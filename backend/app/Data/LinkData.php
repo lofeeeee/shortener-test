@@ -11,8 +11,10 @@ class LinkData extends Data
     public function __construct(
         public readonly string  $id,
         public readonly string  $unique_id,
+        public readonly ?string $title,
         public readonly string  $short_url,
         public readonly string  $link_target,
+        public readonly bool    $is_protected,
         public readonly int     $passed,
         public readonly bool    $is_active,
         public readonly bool    $is_expired,
@@ -31,8 +33,10 @@ class LinkData extends Data
         return new self(
             id: $hashId->encode($link->id),
             unique_id: $link->unique_id,
+            title: $link->title,
             short_url: request()->getSchemeAndHttpHost().'/'.$link->unique_id,
             link_target: $link->link_target,
+            is_protected: !empty($link->password),
             passed: $link->passed,
             is_active: $link->is_active,
             is_expired: $link->isExpired(),

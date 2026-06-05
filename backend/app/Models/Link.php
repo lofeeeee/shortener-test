@@ -15,7 +15,9 @@ class Link extends Model
 
     protected $fillable = [
         'unique_id',
+        'title',
         'link_target',
+        'password',
         'passed',
         'is_active',
         'valid_until',

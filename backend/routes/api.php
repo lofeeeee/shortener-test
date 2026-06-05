@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Route;
 | Public endpoints
 |--------------------------------------------------------------------------
 */
+$slugPattern = '[a-z0-9][a-z0-9_-]{1,18}[a-z0-9]';
+Route::post('{uniqueId}/verify', [\App\Http\Controllers\RedirectController::class, 'verify'])
+    ->where('uniqueId', $slugPattern)
+    ->middleware('throttle:10,1');
+
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:register');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');

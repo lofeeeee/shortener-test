@@ -78,8 +78,10 @@ export const auth = {
 export interface Link {
   id: string;
   unique_id: string;
+  title: string | null;
   short_url: string;
   link_target: string;
+  is_protected: boolean;
   passed: number;
   is_active: boolean;
   is_expired: boolean;
@@ -101,22 +103,36 @@ export interface LinkResponse {
 }
 
 export const links = {
-  list: (params?: { per_page?: number; page?: number; include_deleted?: boolean; include_expired?: boolean }) => {
+  list: (params?: { per_page?: number; page?: number; include_deleted?: boolean; include_expired?: boolean; search?: string }) => {
     const q = new URLSearchParams();
     if (params?.per_page) q.set("per_page", String(params.per_page));
     if (params?.page) q.set("page", String(params.page));
     if (params?.include_deleted) q.set("include_deleted", "true");
     if (params?.include_expired) q.set("include_expired", "true");
+    if (params?.search) q.set("search", params.search);
     return request<LinksResponse>(`/links?${q}`);
   },
 
   get: (id: string) => request<LinkResponse>(`/links/${id}`),
 
-  create: (body: { link_target: string; valid_until?: string | null; custom_slug?: string | null }) =>
+  create: (body: { link_target: string; title?: string | null; valid_until?: string | null; custom_slug?: string | null; password?: string | null }) =>
     request<LinkResponse>("/links", { method: "POST", body: JSON.stringify(body) }),
 
-  update: (id: string, body: { link_target?: string; is_active?: boolean; valid_until?: string | null }) =>
+  update: (id: string, body: { link_target?: string; title?: string | null; is_active?: boolean; valid_until?: string | null; password?: string | null }) =>
     request<LinkResponse>(`/links/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+
+  verify: async (slug: string, password: string): Promise<{ url: string }> => {
+    const res = await fetch(`/api/${slug}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.message ?? "Incorrect password.");
+    }
+    return res.json();
+  },
 
   delete: (id: string) => request<{ message: string }>(`/links/${id}`, { method: "DELETE" }),
 };

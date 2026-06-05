@@ -10,6 +10,7 @@ use App\Models\Link;
 use App\Services\HashIdService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class LinkController extends Controller
 {
@@ -27,6 +28,14 @@ class LinkController extends Controller
         if (!$request->boolean('include_expired')) {
             $query->where(function ($q) {
                 $q->whereNull('valid_until')->orWhere('valid_until', '>', now());
+            });
+        }
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('unique_id', 'like', "%{$search}%")
+                  ->orWhere('link_target', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%");
             });
         }
 
@@ -57,13 +66,19 @@ class LinkController extends Controller
             $uniqueId = $this->generateUniqueId();
         }
 
+        $password = (!($data->password instanceof \Spatie\LaravelData\Optional) && $data->password)
+            ? Hash::make($data->password)
+            : null;
+
         $link = Link::create([
             'link_target' => $data->link_target,
+            'title'       => (!($data->title instanceof \Spatie\LaravelData\Optional)) ? $data->title : null,
+            'password'    => $password,
             'valid_until' => $data->valid_until,
-            'unique_id' => $uniqueId,
-            'passed' => 0,
-            'is_active' => true,
-            'created_by' => $user->id,
+            'unique_id'   => $uniqueId,
+            'passed'      => 0,
+            'is_active'   => true,
+            'created_by'  => $user->id,
         ]);
 
         return response()->json(['data' => LinkData::fromModel($link)], 201);
@@ -88,8 +103,14 @@ class LinkController extends Controller
             return response()->json(['message' => 'Link not found.'], 404);
         }
 
-        // toArray() skips Optional fields that were absent from the request
-        $link->update($data->toArray());
+        $payload = $data->toArray();
+
+        // Hash the new password if provided; null removes it.
+        if (array_key_exists('password', $payload)) {
+            $payload['password'] = $payload['password'] ? Hash::make($payload['password']) : null;
+        }
+
+        $link->update($payload);
 
         return response()->json(['data' => LinkData::fromModel($link->fresh())]);
     }

@@ -48,8 +48,8 @@ export default function LoginPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-teal-900 mb-1">Sign in</h1>
-      <p className="text-sm text-teal-700/60 mb-6">
+      <h1 className="text-2xl font-bold text-teal-900 dark:text-gray-100 mb-1">Sign in</h1>
+      <p className="text-sm text-teal-700/60 dark:text-gray-400 mb-6">
         Don&apos;t have an account?{" "}
         <Link href="/register" className="text-teal-600 font-medium hover:underline">
           Register

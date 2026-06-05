@@ -97,8 +97,8 @@ export default function RegisterPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-teal-900 mb-1">Create account</h1>
-      <p className="text-sm text-teal-700/60 mb-6">
+      <h1 className="text-2xl font-bold text-teal-900 dark:text-gray-100 mb-1">Create account</h1>
+      <p className="text-sm text-teal-700/60 dark:text-gray-400 mb-6">
         Already have an account?{" "}
         <Link href="/login" className="text-teal-600 font-medium hover:underline">
           Sign in

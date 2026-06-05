@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Plus, Copy, Pencil, Trash2, ExternalLink, Link2, MousePointerClick, TrendingUp, Clock, QrCode, BarChart2 } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Plus, Copy, Pencil, Trash2, ExternalLink, Link2, MousePointerClick, TrendingUp, Clock, QrCode, BarChart2, Lock, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { links as linksApi, Link } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -23,16 +23,16 @@ function StatCard({
   loading: boolean;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-teal-100 p-5 flex items-start gap-4">
-      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-teal-50 text-teal-600 shrink-0">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-teal-100 dark:border-gray-800 p-5 flex items-start gap-4">
+      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-950 text-teal-600 shrink-0">
         <Icon className="w-5 h-5" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium text-teal-500 uppercase tracking-wide mb-1">{label}</p>
+        <p className="text-xs font-medium text-teal-500 dark:text-teal-400 uppercase tracking-wide mb-1">{label}</p>
         {loading ? (
           <Skeleton className="h-7 w-16" />
         ) : (
-          <p className="text-2xl font-bold text-teal-900">{value}</p>
+          <p className="text-2xl font-bold text-teal-900 dark:text-gray-100">{value}</p>
         )}
       </div>
     </div>
@@ -55,6 +55,9 @@ export default function DashboardPage() {
   const [lastPage, setLastPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  const [search, setSearch] = useState("");
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [createOpen, setCreateOpen] = useState(false);
   const [editLink, setEditLink] = useState<Link | null>(null);
   const [deleteLink, setDeleteLink] = useState<Link | null>(null);
@@ -62,10 +65,10 @@ export default function DashboardPage() {
 
   const PER_PAGE = 10;
 
-  const load = useCallback(async (p: number) => {
+  const load = useCallback(async (p: number, q = "") => {
     setLoading(true);
     try {
-      const res = await linksApi.list({ per_page: PER_PAGE, page: p });
+      const res = await linksApi.list({ per_page: PER_PAGE, page: p, search: q || undefined });
       setData(res.data);
       setTotal(res.meta.total);
       setLastPage(res.meta.last_page);
@@ -76,7 +79,14 @@ export default function DashboardPage() {
     }
   }, []);
 
-  useEffect(() => { load(page); }, [page, load]);
+  useEffect(() => { load(page, search); }, [page, load]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setPage(1);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => load(1, val), 300);
+  };
 
   const totalClicks = data.reduce((sum, l) => sum + l.passed, 0);
   const activeCount = data.filter((l) => l.is_active && !l.is_expired).length;
@@ -111,13 +121,30 @@ export default function DashboardPage() {
       </div>
 
       {/* Table card */}
-      <div className="bg-white rounded-xl border border-teal-100 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-teal-100 dark:border-gray-800 overflow-hidden">
         {/* Header row */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-teal-50">
-          <h2 className="text-sm font-semibold text-teal-900">Your links</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 border-b border-teal-50 dark:border-gray-800">
+          <h2 className="text-sm font-semibold text-teal-900 dark:text-gray-100 shrink-0">Your links</h2>
+          <div className="flex items-center gap-2 flex-1">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-teal-400" />
+              <input
+                type="text"
+                placeholder="Search links…"
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full pl-8 pr-7 py-1.5 text-sm border border-teal-100 dark:border-gray-700 rounded-lg bg-teal-50/50 dark:bg-gray-800 text-teal-900 dark:text-gray-100 placeholder:text-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-300 dark:focus:ring-teal-700"
+              />
+              {search && (
+                <button onClick={() => handleSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-teal-400 hover:text-teal-600 cursor-pointer">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
           <Button
             onClick={() => setCreateOpen(true)}
-            className="bg-teal-600 hover:bg-teal-700 text-white text-sm cursor-pointer transition-colors duration-150 h-9 px-3"
+            className="bg-teal-600 hover:bg-teal-700 text-white text-sm cursor-pointer transition-colors duration-150 h-9 px-3 shrink-0"
           >
             <Plus className="w-4 h-4 mr-1.5" />
             New link
@@ -128,12 +155,12 @@ export default function DashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-teal-50 text-left">
-                <th className="px-5 py-3 text-xs font-medium text-teal-500 uppercase tracking-wide">Short URL</th>
-                <th className="px-5 py-3 text-xs font-medium text-teal-500 uppercase tracking-wide hidden sm:table-cell">Destination</th>
-                <th className="px-5 py-3 text-xs font-medium text-teal-500 uppercase tracking-wide text-right">Clicks</th>
-                <th className="px-5 py-3 text-xs font-medium text-teal-500 uppercase tracking-wide hidden md:table-cell">Created</th>
-                <th className="px-5 py-3 text-xs font-medium text-teal-500 uppercase tracking-wide hidden md:table-cell">Status</th>
+              <tr className="border-b border-teal-50 dark:border-gray-800 text-left">
+                <th className="px-5 py-3 text-xs font-medium text-teal-500 dark:text-gray-400 uppercase tracking-wide">Short URL</th>
+                <th className="px-5 py-3 text-xs font-medium text-teal-500 dark:text-gray-400 uppercase tracking-wide hidden sm:table-cell">Destination</th>
+                <th className="px-5 py-3 text-xs font-medium text-teal-500 dark:text-gray-400 uppercase tracking-wide text-right">Clicks</th>
+                <th className="px-5 py-3 text-xs font-medium text-teal-500 dark:text-gray-400 uppercase tracking-wide hidden md:table-cell">Created</th>
+                <th className="px-5 py-3 text-xs font-medium text-teal-500 dark:text-gray-400 uppercase tracking-wide hidden md:table-cell">Status</th>
                 <th className="px-5 py-3" />
               </tr>
             </thead>
@@ -161,18 +188,26 @@ export default function DashboardPage() {
                 </tr>
               ) : (
                 data.map((link) => (
-                  <tr key={link.id} className="border-b border-teal-50 last:border-0 hover:bg-teal-50/30 transition-colors">
+                  <tr key={link.id} className="border-b border-teal-50 dark:border-gray-800 last:border-0 hover:bg-teal-50/30 dark:hover:bg-gray-800/50 transition-colors">
                     <td className="px-5 py-3.5">
+                      {link.title && (
+                        <p className="text-xs font-medium text-teal-800 dark:text-gray-200 mb-0.5 truncate max-w-[180px]">{link.title}</p>
+                      )}
                       <div className="flex items-center gap-1.5">
                         <a
                           href={shortUrl(link.unique_id)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-teal-600 font-mono font-medium hover:underline"
+                          className="text-teal-600 font-mono font-medium hover:underline text-xs"
                           title={shortUrl(link.unique_id)}
                         >
                           /{link.unique_id}
                         </a>
+                        {link.is_protected && (
+                          <span title="Password protected">
+                            <Lock className="w-3 h-3 text-teal-400 shrink-0" />
+                          </span>
+                        )}
                         <button
                           onClick={() => copyShortUrl(link.unique_id)}
                           className="text-teal-400 hover:text-teal-600 shrink-0 cursor-pointer"
@@ -194,10 +229,10 @@ export default function DashboardPage() {
                         <ExternalLink className="w-3 h-3 shrink-0" />
                       </a>
                     </td>
-                    <td className="px-5 py-3.5 text-right font-medium text-teal-800">
+                    <td className="px-5 py-3.5 text-right font-medium text-teal-800 dark:text-gray-200">
                       {link.passed.toLocaleString()}
                     </td>
-                    <td className="px-5 py-3.5 hidden md:table-cell text-teal-600/60 text-xs">
+                    <td className="px-5 py-3.5 hidden md:table-cell text-teal-600/60 dark:text-gray-500 text-xs">
                       {formatDate(link.created_at)}
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
@@ -256,7 +291,7 @@ export default function DashboardPage() {
 
         {/* Pagination */}
         {lastPage > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-teal-50">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-teal-50 dark:border-gray-800">
             <p className="text-xs text-teal-500">
               Page {page} of {lastPage}
             </p>

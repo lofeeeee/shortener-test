@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Link2, LayoutDashboard, Settings, LogOut, Menu, X } from "lucide-react";
+import { Link2, LayoutDashboard, Settings, LogOut, Menu, X, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
 const navItems = [
@@ -16,6 +17,7 @@ export default function Header({ title }: { title: string }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { resolvedTheme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -27,7 +29,7 @@ export default function Header({ title }: { title: string }) {
   return (
     <>
       {/* Top bar */}
-      <header className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-teal-100 bg-white lg:px-8">
+      <header className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-teal-100 dark:border-gray-800 bg-white dark:bg-gray-900 lg:px-8">
         {/* Mobile: logo + hamburger */}
         <div className="flex items-center gap-2 lg:hidden">
           <span className="flex items-center justify-center w-7 h-7 bg-teal-600 rounded-lg">
@@ -40,17 +42,26 @@ export default function Header({ title }: { title: string }) {
         <h1 className="hidden lg:block text-lg font-semibold text-teal-900">{title}</h1>
 
         <div className="flex items-center gap-3">
+          {/* Dark mode toggle */}
+          <button
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="p-2 rounded-lg text-teal-500 hover:bg-teal-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+            aria-label="Toggle dark mode"
+          >
+            {resolvedTheme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
           {/* Desktop: user avatar */}
           <div className="hidden lg:flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-700 font-semibold text-sm">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 font-semibold text-sm">
               {user?.display_name?.[0]?.toUpperCase() ?? "?"}
             </div>
-            <span className="text-sm font-medium text-teal-800">{user?.display_name}</span>
+            <span className="text-sm font-medium text-teal-800 dark:text-gray-200">{user?.display_name}</span>
           </div>
 
           {/* Mobile hamburger */}
           <button
-            className="lg:hidden text-teal-700 cursor-pointer"
+            className="lg:hidden text-teal-700 dark:text-gray-300 cursor-pointer"
             onClick={() => setOpen(!open)}
             aria-label="Toggle menu"
           >
@@ -61,7 +72,7 @@ export default function Header({ title }: { title: string }) {
 
       {/* Mobile drawer */}
       {open && (
-        <div className="lg:hidden bg-white border-b border-teal-100 px-4 pb-4 flex flex-col gap-1">
+        <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-teal-100 dark:border-gray-800 px-4 pb-4 flex flex-col gap-1">
           {navItems.map(({ href, icon: Icon, label }) => {
             const active = pathname === href;
             return (

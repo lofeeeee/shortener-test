@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-dvh bg-teal-50/40">
+    <div className="flex min-h-dvh bg-teal-50/40 dark:bg-gray-950">
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <Header title={routeTitle(pathname)} />

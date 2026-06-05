@@ -24,13 +24,13 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-60 shrink-0 bg-white border-r border-teal-100 min-h-dvh">
+    <aside className="hidden lg:flex flex-col w-60 shrink-0 bg-white dark:bg-gray-900 border-r border-teal-100 dark:border-gray-800 min-h-dvh">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 h-16 border-b border-teal-100">
+      <div className="flex items-center gap-2.5 px-5 h-16 border-b border-teal-100 dark:border-gray-800">
         <span className="flex items-center justify-center w-7 h-7 bg-teal-600 rounded-lg">
           <Link2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
         </span>
-        <span className="font-semibold text-teal-800">LinkShort</span>
+        <span className="font-semibold text-teal-800 dark:text-teal-300">LinkShort</span>
       </div>
 
       {/* Nav */}
@@ -43,8 +43,8 @@ export default function Sidebar() {
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 ${
                 active
-                  ? "bg-teal-50 text-teal-700"
-                  : "text-teal-800/60 hover:bg-teal-50/60 hover:text-teal-700"
+                  ? "bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300"
+                  : "text-teal-800/60 dark:text-gray-400 hover:bg-teal-50/60 dark:hover:bg-gray-800 hover:text-teal-700 dark:hover:text-gray-200"
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" strokeWidth={active ? 2.5 : 2} />
@@ -68,14 +68,14 @@ export default function Sidebar() {
       )}
 
       {/* User + logout */}
-      <div className="border-t border-teal-100 p-3">
+      <div className="border-t border-teal-100 dark:border-gray-800 p-3">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-700 font-semibold text-sm shrink-0">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 font-semibold text-sm shrink-0">
             {user?.display_name?.[0]?.toUpperCase() ?? "?"}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-teal-900 truncate">{user?.display_name}</p>
-            <p className="text-xs text-teal-500 truncate">{user?.email}</p>
+            <p className="text-sm font-medium text-teal-900 dark:text-gray-100 truncate">{user?.display_name}</p>
+            <p className="text-xs text-teal-500 dark:text-gray-400 truncate">{user?.email}</p>
           </div>
         </div>
         <button
