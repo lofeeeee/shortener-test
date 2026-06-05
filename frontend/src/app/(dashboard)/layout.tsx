@@ -8,6 +8,7 @@ import Header from "@/components/dashboard/Header";
 
 function routeTitle(pathname: string): string {
   if (pathname.startsWith("/settings")) return "Settings";
+  if (pathname.includes("/analytics")) return "Analytics";
   return "Dashboard";
 }
 

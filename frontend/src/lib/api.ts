@@ -44,6 +44,7 @@ export interface AuthUser {
   email: string;
   is_active: boolean;
   can_custom_slug: boolean;
+  is_admin: boolean;
   created_at: string;
 }
 
@@ -118,6 +119,67 @@ export const links = {
     request<LinkResponse>(`/links/${id}`, { method: "PUT", body: JSON.stringify(body) }),
 
   delete: (id: string) => request<{ message: string }>(`/links/${id}`, { method: "DELETE" }),
+};
+
+// ── Analytics ─────────────────────────────────────────────────────────────
+export interface AnalyticsSeries { date: string; clicks: number }
+export interface AnalyticsBreakdown { name: string; count: number }
+export interface AnalyticsData {
+  total_clicks: number;
+  period_clicks: number;
+  unique_clicks: number;
+  days: number;
+  series: AnalyticsSeries[];
+  by_browser: AnalyticsBreakdown[];
+  by_os: AnalyticsBreakdown[];
+  by_device: AnalyticsBreakdown[];
+  by_referrer: AnalyticsBreakdown[];
+}
+export interface AnalyticsResponse { data: AnalyticsData }
+
+export const analytics = {
+  get: (id: string, days = 30) =>
+    request<AnalyticsResponse>(`/links/${id}/analytics?days=${days}`),
+};
+
+// ── Admin ──────────────────────────────────────────────────────────────────
+export interface AdminStats {
+  total_users: number;
+  total_links: number;
+  active_links: number;
+  total_clicks: number;
+}
+export interface AdminStatsResponse { data: AdminStats }
+export interface AdminUsersResponse {
+  data: AuthUser[];
+  meta: { current_page: number; last_page: number; per_page: number; total: number };
+}
+export interface AdminLinksResponse {
+  data: Link[];
+  meta: { current_page: number; last_page: number; per_page: number; total: number };
+}
+
+export const admin = {
+  stats: () => request<AdminStatsResponse>('/admin/stats'),
+
+  users: (params?: { page?: number; per_page?: number; search?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.per_page) q.set('per_page', String(params.per_page));
+    if (params?.search) q.set('search', params.search);
+    return request<AdminUsersResponse>(`/admin/users?${q}`);
+  },
+
+  updateUser: (id: string, body: { is_active?: boolean; can_custom_slug?: boolean; is_admin?: boolean }) =>
+    request<UserResponse>(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+
+  links: (params?: { page?: number; per_page?: number; search?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.per_page) q.set('per_page', String(params.per_page));
+    if (params?.search) q.set('search', params.search);
+    return request<AdminLinksResponse>(`/admin/links?${q}`);
+  },
 };
 
 // ── Users ─────────────────────────────────────────────────────────────────

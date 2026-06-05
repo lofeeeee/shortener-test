@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // API-only app — never redirect unauthenticated requests to a login page
         $middleware->redirectGuestsTo(fn () => null);
+
+        $middleware->alias(['admin' => \App\Http\Middleware\AdminMiddleware::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, Request $request) {

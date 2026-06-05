@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\UserController;
@@ -11,8 +13,8 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [AuthController::class, 'register'])->middleware('throttle:register');
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
 });
 
 /*
@@ -20,7 +22,7 @@ Route::prefix('auth')->group(function () {
 | Protected endpoints (Sanctum token required)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Auth
     Route::prefix('auth')->group(function () {
@@ -42,5 +44,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('{hashedId}', [LinkController::class, 'show']);
         Route::put('{hashedId}', [LinkController::class, 'update']);
         Route::delete('{hashedId}', [LinkController::class, 'destroy']);
+        Route::get('{hashedId}/analytics', [AnalyticsController::class, 'show']);
+    });
+
+    // Admin (requires is_admin flag)
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('stats', [AdminController::class, 'stats']);
+        Route::get('users', [AdminController::class, 'users']);
+        Route::put('users/{hashedId}', [AdminController::class, 'updateUser']);
+        Route::get('links', [AdminController::class, 'links']);
     });
 });

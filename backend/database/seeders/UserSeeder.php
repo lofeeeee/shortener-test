@@ -17,6 +17,7 @@ class UserSeeder extends Seeder
                 'password' => 'Secret1234!',
                 'is_active' => true,
                 'can_custom_slug' => true,
+                'is_admin' => true,
             ]
         );
 

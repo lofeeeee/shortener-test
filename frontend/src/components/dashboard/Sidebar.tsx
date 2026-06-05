@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Link2, LayoutDashboard, Settings, LogOut } from "lucide-react";
+import { Link2, LayoutDashboard, Settings, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -53,6 +53,19 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Admin shortcut */}
+      {user?.is_admin && (
+        <div className="px-3 pb-1">
+          <Link
+            href="/admin"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors duration-150"
+          >
+            <ShieldCheck className="w-4 h-4 shrink-0" />
+            Admin panel
+          </Link>
+        </div>
+      )}
 
       {/* User + logout */}
       <div className="border-t border-teal-100 p-3">

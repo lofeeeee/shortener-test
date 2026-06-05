@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'is_active',
         'can_custom_slug',
+        'is_admin',
     ];
 
     protected $hidden = [
@@ -29,6 +30,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_active' => 'boolean',
         'can_custom_slug' => 'boolean',
+        'is_admin' => 'boolean',
     ];
 
     public function links()

@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Copy, Pencil, Trash2, ExternalLink, Link2, MousePointerClick, TrendingUp, Clock } from "lucide-react";
+import { Plus, Copy, Pencil, Trash2, ExternalLink, Link2, MousePointerClick, TrendingUp, Clock, QrCode, BarChart2 } from "lucide-react";
 import { toast } from "sonner";
 import { links as linksApi, Link } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import LinkFormModal from "@/components/dashboard/LinkFormModal";
 import DeleteConfirmDialog from "@/components/dashboard/DeleteConfirmDialog";
+import QrCodeModal from "@/components/dashboard/QrCodeModal";
+import { useRouter } from "next/navigation";
 
 function StatCard({
   icon: Icon,
@@ -46,6 +48,7 @@ function truncate(str: string, max = 40) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<Link[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -55,6 +58,7 @@ export default function DashboardPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editLink, setEditLink] = useState<Link | null>(null);
   const [deleteLink, setDeleteLink] = useState<Link | null>(null);
+  const [qrLink, setQrLink] = useState<Link | null>(null);
 
   const PER_PAGE = 10;
 
@@ -214,6 +218,20 @@ export default function DashboardPage() {
                     <td className="px-5 py-3.5">
                       <div className="flex items-center justify-end gap-1">
                         <button
+                          onClick={() => router.push(`/dashboard/links/${link.id}/analytics`)}
+                          className="p-1.5 rounded-md text-teal-400 hover:text-teal-600 hover:bg-teal-50 transition-colors cursor-pointer"
+                          aria-label="View analytics"
+                        >
+                          <BarChart2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setQrLink(link)}
+                          className="p-1.5 rounded-md text-teal-400 hover:text-teal-600 hover:bg-teal-50 transition-colors cursor-pointer"
+                          aria-label="Show QR code"
+                        >
+                          <QrCode className="w-3.5 h-3.5" />
+                        </button>
+                        <button
                           onClick={() => setEditLink(link)}
                           className="p-1.5 rounded-md text-teal-400 hover:text-teal-600 hover:bg-teal-50 transition-colors cursor-pointer"
                           aria-label="Edit link"
@@ -285,6 +303,14 @@ export default function DashboardPage() {
           onDeleted={() => { load(page); }}
           linkId={deleteLink.id}
           shortUrl={deleteLink.short_url}
+        />
+      )}
+      {qrLink && (
+        <QrCodeModal
+          open={!!qrLink}
+          onClose={() => setQrLink(null)}
+          url={shortUrl(qrLink.unique_id)}
+          slug={qrLink.unique_id}
         />
       )}
     </>
