@@ -34,13 +34,13 @@ const faqs = [
 
 export default function FAQ() {
   return (
-    <section id="faq" className="py-20 px-4 sm:px-6 bg-white">
+    <section id="faq" className="py-20 px-4 sm:px-6 bg-white dark:bg-gray-950">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-sm font-semibold text-teal-600 uppercase tracking-widest mb-3">
             FAQ
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-teal-900">
+          <h2 className="text-3xl sm:text-4xl font-bold text-teal-900 dark:text-gray-100">
             Common questions
           </h2>
         </div>
@@ -50,12 +50,12 @@ export default function FAQ() {
             <AccordionItem
               key={i}
               value={`item-${i}`}
-              className="border border-teal-100 rounded-lg px-5 data-[state=open]:border-teal-300 data-[state=open]:bg-teal-50/60 transition-all duration-150"
+              className="border border-teal-100 dark:border-gray-800 rounded-lg px-5 data-[state=open]:border-teal-300 dark:data-[state=open]:border-teal-800 data-[state=open]:bg-teal-50/60 dark:data-[state=open]:bg-teal-950/40 transition-all duration-150"
             >
-              <AccordionTrigger className="text-left text-sm font-medium text-teal-900 hover:no-underline py-4 cursor-pointer">
+              <AccordionTrigger className="text-left text-sm font-medium text-teal-900 dark:text-gray-100 hover:no-underline py-4 cursor-pointer">
                 {faq.q}
               </AccordionTrigger>
-              <AccordionContent className="text-sm text-teal-800/65 leading-relaxed pb-4">
+              <AccordionContent className="text-sm text-teal-800/65 dark:text-gray-400 leading-relaxed pb-4">
                 {faq.a}
               </AccordionContent>
             </AccordionItem>

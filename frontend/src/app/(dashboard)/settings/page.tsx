@@ -115,8 +115,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
       {/* Profile */}
-      <section className="bg-white rounded-xl border border-teal-100 p-6">
-        <h2 className="text-base font-semibold text-teal-900 mb-4">Profile</h2>
+      <section className="bg-white dark:bg-gray-900 rounded-xl border border-teal-100 dark:border-gray-800 p-6">
+        <h2 className="text-base font-semibold text-teal-900 dark:text-gray-100 mb-4">Profile</h2>
         <form onSubmit={handleProfileSave} noValidate className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="display-name">Display name</Label>
@@ -150,7 +150,7 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-1.5">
             <Label>Username</Label>
             <Input value={user?.username ?? ""} disabled className="opacity-50 cursor-not-allowed" />
-            <p className="text-xs text-teal-500">Username cannot be changed.</p>
+            <p className="text-xs text-teal-500 dark:text-teal-400">Username cannot be changed.</p>
           </div>
 
           <div className="flex justify-end mt-1">
@@ -171,8 +171,8 @@ export default function SettingsPage() {
       </section>
 
       {/* Password */}
-      <section className="bg-white rounded-xl border border-teal-100 p-6">
-        <h2 className="text-base font-semibold text-teal-900 mb-4">Change password</h2>
+      <section className="bg-white dark:bg-gray-900 rounded-xl border border-teal-100 dark:border-gray-800 p-6">
+        <h2 className="text-base font-semibold text-teal-900 dark:text-gray-100 mb-4">Change password</h2>
         <form onSubmit={handlePasswordSave} noValidate className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="new-password">New password</Label>
@@ -222,15 +222,15 @@ export default function SettingsPage() {
       </section>
 
       {/* Danger zone */}
-      <section className="bg-white rounded-xl border border-red-100 p-6">
+      <section className="bg-white dark:bg-gray-900 rounded-xl border border-red-100 dark:border-red-900/40 p-6">
         <h2 className="text-base font-semibold text-red-600 mb-1">Danger zone</h2>
-        <p className="text-sm text-teal-700/60 mb-4">
+        <p className="text-sm text-teal-700/60 dark:text-gray-400 mb-4">
           Deleting your account is permanent. All your links and data will be removed.
         </p>
         <Button
           type="button"
           onClick={() => setDeleteOpen(true)}
-          className="border border-red-200 bg-white text-red-500 hover:bg-red-50 cursor-pointer transition-colors duration-150"
+          className="border border-red-200 dark:border-red-800 bg-white dark:bg-transparent text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors duration-150"
           variant="ghost"
         >
           <Trash2 className="w-4 h-4 mr-2" />
@@ -242,8 +242,8 @@ export default function SettingsPage() {
       <Dialog open={deleteOpen} onOpenChange={(v) => !v && setDeleteOpen(false)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-teal-900">Delete account?</DialogTitle>
-            <DialogDescription className="text-teal-700/70 text-sm pt-1">
+            <DialogTitle className="text-teal-900 dark:text-gray-100">Delete account?</DialogTitle>
+            <DialogDescription className="text-teal-700/70 dark:text-gray-400 text-sm pt-1">
               This action is permanent and cannot be undone. All your links and data will be lost.
             </DialogDescription>
           </DialogHeader>

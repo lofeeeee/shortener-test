@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 function routeTitle(pathname: string): string {
   if (pathname.startsWith("/settings")) return "Settings";
@@ -39,7 +40,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <Header title={routeTitle(pathname)} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
       </div>
     </div>
   );

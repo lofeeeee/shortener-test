@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Link2, Menu, X } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Link2, Menu, X, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { href: "#features", label: "Features" },
@@ -15,6 +15,8 @@ const navLinks = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
+  const { user } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -25,12 +27,14 @@ export default function Navbar() {
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-200 ${
-        scrolled ? "bg-white/95 backdrop-blur-sm border-b border-teal-100 shadow-sm" : "bg-transparent"
+        scrolled
+          ? "bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-teal-100 dark:border-gray-800 shadow-sm"
+          : "bg-transparent"
       }`}
     >
       <nav className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-semibold text-teal-700">
+        <Link href="/" className="flex items-center gap-2 font-semibold text-teal-700 dark:text-teal-400">
           <span className="flex items-center justify-center w-8 h-8 bg-teal-600 rounded-lg">
             <Link2 className="w-4 h-4 text-white" strokeWidth={2.5} />
           </span>
@@ -43,7 +47,7 @@ export default function Navbar() {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-teal-800/70 hover:text-teal-700 transition-colors duration-150"
+              className="text-sm font-medium text-teal-800/70 dark:text-gray-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors duration-150"
             >
               {l.label}
             </a>
@@ -52,26 +56,24 @@ export default function Navbar() {
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="text-sm font-medium text-teal-700 hover:text-teal-600 transition-colors duration-150"
+          <button
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="p-2 rounded-lg text-teal-500 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+            aria-label="Toggle dark mode"
           >
-            Sign In
-          </Link>
+            {resolvedTheme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <Link
-            href="/register"
-            className={cn(
-              buttonVariants(),
-              "bg-orange-600 hover:bg-orange-700 text-white text-sm cursor-pointer transition-colors duration-150"
-            )}
+            href={user ? "/dashboard" : "/login"}
+            className="text-sm font-medium text-teal-700 dark:text-teal-400 hover:text-teal-600 dark:hover:text-teal-300 transition-colors duration-150"
           >
-            Get Started
+            {user ? "Dashboard" : "Sign In"}
           </Link>
         </div>
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-teal-700 p-1 cursor-pointer"
+          className="md:hidden text-teal-700 dark:text-teal-400 p-1 cursor-pointer"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
@@ -81,34 +83,31 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-white border-b border-teal-100 px-4 pb-4 flex flex-col gap-3">
+        <div className="md:hidden bg-white dark:bg-gray-950 border-b border-teal-100 dark:border-gray-800 px-4 pb-4 flex flex-col gap-3">
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="text-sm font-medium text-teal-800/80 hover:text-teal-700 py-2 transition-colors duration-150"
+              className="text-sm font-medium text-teal-800/80 dark:text-gray-400 hover:text-teal-700 dark:hover:text-teal-300 py-2 transition-colors duration-150"
             >
               {l.label}
             </a>
           ))}
           <Link
-            href="/login"
+            href={user ? "/dashboard" : "/login"}
             onClick={() => setOpen(false)}
-            className="text-sm font-medium text-teal-700 hover:text-teal-600 py-2 transition-colors duration-150"
+            className="text-sm font-medium text-teal-700 dark:text-teal-400 hover:text-teal-600 dark:hover:text-teal-300 py-2 transition-colors duration-150"
           >
-            Sign In
+            {user ? "Dashboard" : "Sign In"}
           </Link>
-          <Link
-            href="/register"
-            onClick={() => setOpen(false)}
-            className={cn(
-              buttonVariants(),
-              "bg-orange-600 hover:bg-orange-700 text-white mt-1 cursor-pointer justify-center"
-            )}
+          <button
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
           >
-            Get Started
-          </Link>
+            {resolvedTheme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+          </button>
         </div>
       )}
     </header>

@@ -37,5 +37,9 @@ class CreateLinkData extends Data
         // Optional password to gate the redirect.
         #[Nullable, StringType, Min(4), Max(72)]
         public readonly Optional|string|null $password,
+
+        // Optional click limit — auto-deactivates link after N clicks.
+        #[Nullable, Min(1), Max(1000000)]
+        public readonly Optional|int|null $click_limit,
     ) {}
 }

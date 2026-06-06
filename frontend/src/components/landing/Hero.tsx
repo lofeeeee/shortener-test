@@ -22,7 +22,7 @@ Authorization: Bearer <token>
 
 export default function Hero() {
   return (
-    <section className="relative pt-32 pb-20 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-teal-50 to-white">
+    <section className="relative pt-32 pb-20 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-teal-50 to-white dark:from-gray-900 dark:to-gray-950">
       {/* background grid */}
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -37,12 +37,12 @@ export default function Hero() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left: copy */}
           <div className="flex flex-col gap-6">
-            <Badge className="w-fit bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-100 px-3 py-1 text-xs font-medium">
+            <Badge className="w-fit bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/40 px-3 py-1 text-xs font-medium">
               <Zap className="w-3 h-3 mr-1.5" />
               REST API · Laravel · Open Source
             </Badge>
 
-            <h1 className="text-4xl sm:text-5xl font-bold text-teal-900 leading-tight tracking-tight">
+            <h1 className="text-4xl sm:text-5xl font-bold text-teal-900 dark:text-gray-100 leading-tight tracking-tight">
               Shorten links.
               <br />
               Track clicks.
@@ -50,7 +50,7 @@ export default function Hero() {
               <span className="text-teal-600">Own the data.</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-teal-800/60 max-w-md leading-relaxed">
+            <p className="text-base sm:text-lg text-teal-800/60 dark:text-gray-400 max-w-md leading-relaxed">
               A developer-first link shortener API built with Laravel. Create
               short URLs, set expiry dates, and track every redirect — all
               through a clean REST API secured with Sanctum tokens.
@@ -84,7 +84,7 @@ export default function Hero() {
                 (tag) => (
                   <span
                     key={tag}
-                    className="text-xs text-teal-600 font-medium bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-full"
+                    className="text-xs text-teal-600 dark:text-teal-400 font-medium bg-teal-50 dark:bg-teal-950 border border-teal-200 dark:border-teal-800 px-2.5 py-1 rounded-full"
                   >
                     {tag}
                   </span>

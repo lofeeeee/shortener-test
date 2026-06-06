@@ -22,7 +22,7 @@ class LinkController extends Controller
             ->orderBy('created_at', 'desc');
 
         if (!$request->boolean('include_deleted')) {
-            $query->where('is_active', true);
+            $query->whereNull('deleted_at');
         }
 
         if (!$request->boolean('include_expired')) {
@@ -75,6 +75,7 @@ class LinkController extends Controller
             'title'       => (!($data->title instanceof \Spatie\LaravelData\Optional)) ? $data->title : null,
             'password'    => $password,
             'valid_until' => $data->valid_until,
+            'click_limit' => (!($data->click_limit instanceof \Spatie\LaravelData\Optional)) ? $data->click_limit : null,
             'unique_id'   => $uniqueId,
             'passed'      => 0,
             'is_active'   => true,
@@ -134,6 +135,38 @@ class LinkController extends Controller
         ]);
 
         return response()->json(['message' => 'Link deleted successfully.']);
+    }
+
+    public function bulkDestroy(Request $request): JsonResponse
+    {
+        $request->validate(['ids' => 'required|array|min:1|max:100', 'ids.*' => 'string']);
+
+        $ids = array_filter(array_map(fn ($id) => $this->hashId->decode($id), $request->input('ids')));
+
+        Link::where('created_by', $request->user()->id)
+            ->whereIn('id', $ids)
+            ->whereNull('deleted_at')
+            ->update(['is_active' => false, 'deleted_at' => now(), 'deleted_by' => $request->user()->id]);
+
+        return response()->json(['message' => 'Links deleted.']);
+    }
+
+    public function bulkUpdate(Request $request): JsonResponse
+    {
+        $request->validate([
+            'ids'       => 'required|array|min:1|max:100',
+            'ids.*'     => 'string',
+            'is_active' => 'required|boolean',
+        ]);
+
+        $ids = array_filter(array_map(fn ($id) => $this->hashId->decode($id), $request->input('ids')));
+
+        Link::where('created_by', $request->user()->id)
+            ->whereIn('id', $ids)
+            ->whereNull('deleted_at')
+            ->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['message' => 'Links updated.']);
     }
 
     private function resolveLink(string $hashedId, int $userId): ?Link

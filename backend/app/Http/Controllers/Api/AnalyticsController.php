@@ -8,6 +8,7 @@ use App\Models\LinkClick;
 use App\Services\HashIdService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AnalyticsController extends Controller
 {
@@ -25,68 +26,96 @@ class AnalyticsController extends Controller
             return response()->json(['message' => 'Resource not found.'], 404);
         }
 
-        $days = min((int) $request->query('days', 30), 90);
-        $since = now()->subDays($days)->startOfDay();
+        $days   = min((int) $request->query('days', 30), 90);
+        $offset = max(0, min((int) $request->query('offset', 0), 365));
 
-        $clicks = LinkClick::where('link_id', $link->id)
+        $since = now()->subDays($days + $offset)->startOfDay();
+        $until = $offset > 0 ? now()->subDays($offset)->endOfDay() : now();
+
+        $baseQuery = fn () => LinkClick::where('link_id', $link->id)
             ->where('clicked_at', '>=', $since)
-            ->get(['clicked_at', 'browser', 'os', 'device_type', 'ip_hash', 'referrer']);
+            ->where('clicked_at', '<=', $until);
 
-        $byDay = $clicks
-            ->groupBy(fn ($c) => $c->clicked_at->format('Y-m-d'))
-            ->map(fn ($g) => $g->count())
-            ->sortKeys();
+        // ── Series: daily totals via SQL GROUP BY ─────────────────────────
+        $byDay = $baseQuery()
+            ->selectRaw("TO_CHAR(clicked_at, 'YYYY-MM-DD') AS date, COUNT(*) AS clicks")
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('clicks', 'date');
 
-        // Fill missing days with 0
-        $series = [];
+        $series  = [];
+        $endDate = now()->subDays($offset);
         for ($i = $days - 1; $i >= 0; $i--) {
-            $date = now()->subDays($i)->format('Y-m-d');
-            $series[] = ['date' => $date, 'clicks' => $byDay[$date] ?? 0];
+            $date     = $endDate->copy()->subDays($i)->format('Y-m-d');
+            $series[] = ['date' => $date, 'clicks' => (int) ($byDay[$date] ?? 0)];
         }
 
-        $byBrowser = $clicks->whereNotNull('browser')
+        // ── Aggregate stats ───────────────────────────────────────────────
+        $totalInPeriod  = $baseQuery()->count();
+        $uniqueInPeriod = $baseQuery()->whereNotNull('ip_hash')
+            ->count(DB::raw('DISTINCT ip_hash'));
+
+        // ── Breakdowns via SQL GROUP BY ───────────────────────────────────
+        $byBrowser = $baseQuery()
+            ->whereNotNull('browser')
+            ->selectRaw('browser AS name, COUNT(*) AS count')
             ->groupBy('browser')
-            ->map(fn ($g) => $g->count())
-            ->sortDesc()
-            ->take(8);
+            ->orderByDesc('count')
+            ->limit(8)
+            ->get(['name', 'count']);
 
-        $byOs = $clicks->whereNotNull('os')
+        $byOs = $baseQuery()
+            ->whereNotNull('os')
+            ->selectRaw('os AS name, COUNT(*) AS count')
             ->groupBy('os')
-            ->map(fn ($g) => $g->count())
-            ->sortDesc()
-            ->take(8);
+            ->orderByDesc('count')
+            ->limit(8)
+            ->get(['name', 'count']);
 
-        $byDevice = $clicks->whereNotNull('device_type')
+        $byDevice = $baseQuery()
+            ->whereNotNull('device_type')
+            ->selectRaw('device_type AS name, COUNT(*) AS count')
             ->groupBy('device_type')
-            ->map(fn ($g) => $g->count())
-            ->sortDesc();
+            ->orderByDesc('count')
+            ->get(['name', 'count']);
 
-        $byReferrer = $clicks->whereNotNull('referrer')
+        // Referrer host parsing still needs PHP; limit the row set to keep it fast
+        $referrerRows = $baseQuery()
+            ->whereNotNull('referrer')
+            ->select('referrer')
+            ->limit(5000)
+            ->get();
+
+        $byReferrer = $referrerRows
             ->groupBy(fn ($c) => parse_url($c->referrer, PHP_URL_HOST) ?? $c->referrer)
             ->map(fn ($g) => $g->count())
             ->sortDesc()
             ->take(10);
 
-        $totalInPeriod = $clicks->count();
-        $uniqueInPeriod = $clicks->whereNotNull('ip_hash')->pluck('ip_hash')->unique()->count();
-
         return response()->json([
             'data' => [
-                'total_clicks'   => $link->passed,
-                'period_clicks'  => $totalInPeriod,
-                'unique_clicks'  => $uniqueInPeriod,
-                'days'           => $days,
-                'series'         => $series,
-                'by_browser'     => $this->toBreakdown($byBrowser),
-                'by_os'          => $this->toBreakdown($byOs),
-                'by_device'      => $this->toBreakdown($byDevice),
-                'by_referrer'    => $this->toBreakdown($byReferrer),
+                'total_clicks'  => $link->passed,
+                'period_clicks' => $totalInPeriod,
+                'unique_clicks' => $uniqueInPeriod,
+                'days'          => $days,
+                'series'        => $series,
+                'by_browser'    => $this->toBreakdown($byBrowser),
+                'by_os'         => $this->toBreakdown($byOs),
+                'by_device'     => $this->toBreakdown($byDevice),
+                'by_referrer'   => $this->toBreakdown($byReferrer),
             ],
         ]);
     }
 
-    private function toBreakdown(\Illuminate\Support\Collection $col): array
+    private function toBreakdown(mixed $col): array
     {
-        return $col->map(fn ($count, $name) => ['name' => $name, 'count' => $count])->values()->all();
+        if ($col instanceof \Illuminate\Support\Collection) {
+            // Keyed collection (referrer) vs model collection (SQL results)
+            if ($col->first() instanceof \Illuminate\Database\Eloquent\Model) {
+                return $col->map(fn ($r) => ['name' => $r->name, 'count' => (int) $r->count])->values()->all();
+            }
+            return $col->map(fn ($count, $name) => ['name' => $name, 'count' => $count])->values()->all();
+        }
+        return [];
     }
 }

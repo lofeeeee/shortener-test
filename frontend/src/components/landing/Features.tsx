@@ -48,16 +48,16 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 bg-white">
+    <section id="features" className="py-20 px-4 sm:px-6 bg-white dark:bg-gray-950">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="text-sm font-semibold text-teal-600 uppercase tracking-widest mb-3">
             Features
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-teal-900">
+          <h2 className="text-3xl sm:text-4xl font-bold text-teal-900 dark:text-gray-100">
             Everything you need. Nothing you don&apos;t.
           </h2>
-          <p className="mt-4 text-teal-800/60 max-w-xl mx-auto">
+          <p className="mt-4 text-teal-800/60 dark:text-gray-400 max-w-xl mx-auto">
             Built as a pure REST API — integrate it into any stack, any
             platform, any project.
           </p>
@@ -67,13 +67,13 @@ export default function Features() {
           {features.map((f) => (
             <div
               key={f.title}
-              className="group p-6 rounded-xl border border-teal-100 bg-teal-50/40 hover:border-teal-300 hover:bg-teal-50 transition-all duration-150"
+              className="group p-6 rounded-xl border border-teal-100 dark:border-gray-800 bg-teal-50/40 dark:bg-gray-900/40 hover:border-teal-300 dark:hover:border-teal-800 hover:bg-teal-50 dark:hover:bg-gray-900 transition-all duration-150"
             >
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-teal-100 mb-4 group-hover:bg-teal-200 transition-colors duration-150">
-                <f.icon className="w-5 h-5 text-teal-700" strokeWidth={1.75} />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-teal-100 dark:bg-teal-900/40 mb-4 group-hover:bg-teal-200 dark:group-hover:bg-teal-900 transition-colors duration-150">
+                <f.icon className="w-5 h-5 text-teal-700 dark:text-teal-400" strokeWidth={1.75} />
               </div>
-              <h3 className="font-semibold text-teal-900 mb-2">{f.title}</h3>
-              <p className="text-sm text-teal-800/60 leading-relaxed">
+              <h3 className="font-semibold text-teal-900 dark:text-gray-100 mb-2">{f.title}</h3>
+              <p className="text-sm text-teal-800/60 dark:text-gray-400 leading-relaxed">
                 {f.description}
               </p>
             </div>

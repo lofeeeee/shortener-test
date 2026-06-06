@@ -21,6 +21,7 @@ class Link extends Model
         'passed',
         'is_active',
         'valid_until',
+        'click_limit',
         'created_by',
         'deleted_at',
         'deleted_by',
@@ -31,6 +32,7 @@ class Link extends Model
         'deleted_at' => 'datetime',
         'is_active' => 'boolean',
         'passed' => 'integer',
+        'click_limit' => 'integer',
     ];
 
     public function isExpired(): bool

@@ -1,35 +1,43 @@
 const BASE = "/api";
 
-function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("token");
+// Structured error — consumers can inspect `fields` for per-field validation messages
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly fields: Record<string, string[]> = {}
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+
+  /** First message for a given field, or undefined */
+  field(key: string): string | undefined {
+    return this.fields[key]?.[0];
+  }
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getToken();
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  // Token injection is handled server-side by src/middleware.ts reading the HttpOnly cookie.
+  // No Authorization header needed here — the browser sends the cookie automatically.
   const res = await fetch(`${BASE}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
+    const fields: Record<string, string[]> = body?.errors ?? {};
     const message =
       body?.message ??
-      (body?.errors
-        ? Object.values(body.errors as Record<string, string[]>)
-            .flat()
-            .join(" ")
+      (Object.keys(fields).length
+        ? Object.values(fields).flat().join(" ")
         : `Request failed: ${res.status}`);
-    throw new Error(message);
+    throw new ApiError(message, res.status, fields);
   }
 
   if (res.status === 204) return undefined as T;
@@ -48,9 +56,9 @@ export interface AuthUser {
   created_at: string;
 }
 
+// Token is set as an HttpOnly cookie by the Next.js route handler — never exposed to JS
 export interface AuthResponse {
   data: AuthUser;
-  token: string;
 }
 
 export interface MeResponse {
@@ -83,6 +91,7 @@ export interface Link {
   link_target: string;
   is_protected: boolean;
   passed: number;
+  click_limit: number | null;
   is_active: boolean;
   is_expired: boolean;
   valid_until: string | null;
@@ -115,10 +124,10 @@ export const links = {
 
   get: (id: string) => request<LinkResponse>(`/links/${id}`),
 
-  create: (body: { link_target: string; title?: string | null; valid_until?: string | null; custom_slug?: string | null; password?: string | null }) =>
+  create: (body: { link_target: string; title?: string | null; valid_until?: string | null; custom_slug?: string | null; password?: string | null; click_limit?: number | null }) =>
     request<LinkResponse>("/links", { method: "POST", body: JSON.stringify(body) }),
 
-  update: (id: string, body: { link_target?: string; title?: string | null; is_active?: boolean; valid_until?: string | null; password?: string | null }) =>
+  update: (id: string, body: { link_target?: string; title?: string | null; is_active?: boolean; valid_until?: string | null; password?: string | null; click_limit?: number | null }) =>
     request<LinkResponse>(`/links/${id}`, { method: "PUT", body: JSON.stringify(body) }),
 
   verify: async (slug: string, password: string): Promise<{ url: string }> => {
@@ -135,6 +144,12 @@ export const links = {
   },
 
   delete: (id: string) => request<{ message: string }>(`/links/${id}`, { method: "DELETE" }),
+
+  bulkDelete: (ids: string[]) =>
+    request<{ message: string }>("/links/bulk", { method: "DELETE", body: JSON.stringify({ ids }) }),
+
+  bulkUpdate: (ids: string[], is_active: boolean) =>
+    request<{ message: string }>("/links/bulk", { method: "PUT", body: JSON.stringify({ ids, is_active }) }),
 };
 
 // ── Analytics ─────────────────────────────────────────────────────────────
@@ -154,9 +169,20 @@ export interface AnalyticsData {
 export interface AnalyticsResponse { data: AnalyticsData }
 
 export const analytics = {
-  get: (id: string, days = 30) =>
-    request<AnalyticsResponse>(`/links/${id}/analytics?days=${days}`),
+  get: (id: string, days = 30, offset = 0) =>
+    request<AnalyticsResponse>(`/links/${id}/analytics?days=${days}&offset=${offset}`),
 };
+
+// ── Bio ───────────────────────────────────────────────────────────────────
+export interface BioLink { unique_id: string; title: string; short_url: string; clicks: number }
+export interface BioData {
+  username: string;
+  display_name: string;
+  member_since: string;
+  link_count: number;
+  links: BioLink[];
+}
+export interface BioResponse { data: BioData }
 
 // ── Admin ──────────────────────────────────────────────────────────────────
 export interface AdminStats {

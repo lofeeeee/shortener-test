@@ -17,6 +17,8 @@ Route::post('{uniqueId}/verify', [\App\Http\Controllers\RedirectController::clas
     ->where('uniqueId', $slugPattern)
     ->middleware('throttle:10,1');
 
+Route::get('users/{username}/bio', [\App\Http\Controllers\Api\BioController::class, 'show']);
+
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:register');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -46,6 +48,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::prefix('links')->group(function () {
         Route::get('/', [LinkController::class, 'index']);
         Route::post('/', [LinkController::class, 'store']);
+        // Bulk routes must be before {hashedId} to prevent "bulk" being decoded as an ID
+        Route::delete('bulk', [LinkController::class, 'bulkDestroy']);
+        Route::put('bulk', [LinkController::class, 'bulkUpdate']);
         Route::get('{hashedId}', [LinkController::class, 'show']);
         Route::put('{hashedId}', [LinkController::class, 'update']);
         Route::delete('{hashedId}', [LinkController::class, 'destroy']);

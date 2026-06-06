@@ -34,6 +34,7 @@ export default function LinkFormModal({ open, onClose, onSaved, link }: Props) {
   const [customSlug, setCustomSlug] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [clickLimit, setClickLimit] = useState("");
   const [errors, setErrors] = useState<{ target?: string; customSlug?: string }>({});
   const [loading, setLoading] = useState(false);
 
@@ -45,6 +46,7 @@ export default function LinkFormModal({ open, onClose, onSaved, link }: Props) {
       setCustomSlug("");
       setPassword("");
       setShowPassword(false);
+      setClickLimit(link?.click_limit ? String(link.click_limit) : "");
       setErrors({});
     }
   }, [open, link]);
@@ -80,6 +82,7 @@ export default function LinkFormModal({ open, onClose, onSaved, link }: Props) {
         title: title.trim() || null,
         valid_until: validUntil || null,
         password: password || null,
+        click_limit: clickLimit ? parseInt(clickLimit, 10) : null,
         ...(canCustomSlug && !isEdit && customSlug ? { custom_slug: customSlug } : {}),
       };
       if (isEdit && link) {
@@ -198,6 +201,21 @@ export default function LinkFormModal({ open, onClose, onSaved, link }: Props) {
             {isEdit && link?.is_protected && !password && (
               <p className="text-xs text-teal-500/70">This link already has a password set.</p>
             )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="click-limit">
+              Click limit <span className="text-teal-500 font-normal">(optional — auto-deactivates after N clicks)</span>
+            </Label>
+            <Input
+              id="click-limit"
+              type="number"
+              min={1}
+              max={1000000}
+              placeholder="e.g. 100"
+              value={clickLimit}
+              onChange={(e) => setClickLimit(e.target.value.replace(/\D/g, ""))}
+            />
           </div>
 
           <DialogFooter className="mt-2">

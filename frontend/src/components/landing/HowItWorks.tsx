@@ -33,13 +33,13 @@ GET /api/links/{hashedId}
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 px-4 sm:px-6 bg-teal-50">
+    <section id="how-it-works" className="py-20 px-4 sm:px-6 bg-teal-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="text-sm font-semibold text-teal-600 uppercase tracking-widest mb-3">
             How It Works
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-teal-900">
+          <h2 className="text-3xl sm:text-4xl font-bold text-teal-900 dark:text-gray-100">
             Up and running in minutes
           </h2>
         </div>
@@ -49,16 +49,16 @@ export default function HowItWorks() {
             <div key={s.step} className="flex flex-col gap-4">
               {/* Step number */}
               <div className="flex items-center gap-3">
-                <span className="text-4xl font-bold text-teal-200">
+                <span className="text-4xl font-bold text-teal-200 dark:text-teal-800">
                   {s.step}
                 </span>
                 {i < steps.length - 1 && (
-                  <div className="hidden lg:block flex-1 h-px bg-teal-200" />
+                  <div className="hidden lg:block flex-1 h-px bg-teal-200 dark:bg-teal-800" />
                 )}
               </div>
 
-              <h3 className="text-lg font-semibold text-teal-900">{s.title}</h3>
-              <p className="text-sm text-teal-800/60 leading-relaxed">
+              <h3 className="text-lg font-semibold text-teal-900 dark:text-gray-100">{s.title}</h3>
+              <p className="text-sm text-teal-800/60 dark:text-gray-400 leading-relaxed">
                 {s.description}
               </p>
 

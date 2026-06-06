@@ -36,5 +36,9 @@ class UpdateLinkData extends Data
         // Pass null to remove an existing password.
         #[Nullable, StringType, Min(4), Max(72)]
         public readonly Optional|string|null $password,
+
+        // Pass null to remove an existing click limit.
+        #[Nullable, Min(1), Max(1000000)]
+        public readonly Optional|int|null $click_limit,
     ) {}
 }
